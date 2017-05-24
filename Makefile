@@ -1,7 +1,7 @@
 RM=rm -rf
 MKDIR=mkdir -p
 
-# ugly fix for macosx 
+# ugly fix for macosx
 
 detected_OS := $(shell uname -s)
 ifeq ($(detected_OS),Darwin)
@@ -14,7 +14,7 @@ else
     LIB_EXT := .so
 endif
 
-.PHONY: OMSimulator config config-OMSimulator config-fmil config-lua config-cvode config-kinsol config-3rdParty distclean testsuite
+.PHONY: OMSimulator config config-OMSimulator config-fmil config-lua config-cvode config-kinsol config-3rdParty distclean testsuite doc
 
 OMSimulator:
 	@echo
@@ -92,3 +92,7 @@ testsuite:
 	@echo "# run testsuite"
 	@echo
 	@$(MAKE) -C testsuite all
+
+doc:
+	@$(MAKE) -C doc html
+	@$(MAKE) -C doc latexpdf

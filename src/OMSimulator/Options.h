@@ -60,6 +60,7 @@ public:
   std::string resultFile;
   std::string tempDir;
   std::string workingDir;
+  std::string logfile;
 };
 
 #endif

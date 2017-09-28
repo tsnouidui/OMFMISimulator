@@ -44,6 +44,7 @@ ProgramOptions::ProgramOptions()
   resultFile = "";
   tempDir = "";
   workingDir = "";
+  logfile = "";
   startTime = 0.0;
   useStartTime = false;
   stopTime = 1.0;
@@ -62,6 +63,7 @@ bool ProgramOptions::load_flags(int argc, char** argv)
   visible_options.add_options()
   ("describe,d", "Displays brief summary of given model")
   ("help,h", "Displays the help text")
+  ("logFile,l", boost::program_options::value<std::string>(&logfile), "Specifies the logfile (stdout is used if no log file is specified).")
   ("resultFile,r", boost::program_options::value<std::string>(&resultFile), "Specifies the name of the output result file")
   ("startTime,s", boost::program_options::value<double>(&startTime), "Specifies the start time.")
   ("stopTime,t", boost::program_options::value<double>(&stopTime), "Specifies the stop time.")

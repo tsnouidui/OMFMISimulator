@@ -68,6 +68,8 @@ int main(int argc, char *argv[])
     return 1;
   }
 
+  oms_setLogFile(options.logfile.c_str());
+
   if (options.workingDir != "")
     oms_setWorkingDirectory(options.workingDir.c_str());
 

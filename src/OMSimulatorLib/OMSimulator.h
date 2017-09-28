@@ -214,7 +214,7 @@ void oms_setTolerance(void* model, double tolerance);
 void oms_setCommunicationInterval(void* model, double communicationInterval);
 void oms_setResultFile(void* model, const char* filename);
 void oms_setSolverMethod(void* model, const char* instanceName, const char* method);
-void oms_logToStdStream(int useStdStream);
+void oms_setLogFile(const char* filename);
 
 /**
  * \brief Returns the library's version string.

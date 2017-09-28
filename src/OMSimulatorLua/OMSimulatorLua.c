@@ -448,15 +448,15 @@ static int OMSimulatorLua_setSolverMethod(lua_State *L)
   return 0;
 }
 
-//void oms_logToStdStream(bool useStdStream);
-static int OMSimulatorLua_logToStdStream(lua_State *L)
+//void oms_setLogFile(const char* filename);
+static int OMSimulatorLua_setLogFile(lua_State *L)
 {
   if (lua_gettop(L) != 1)
     return luaL_error(L, "expecting exactly 1 argument");
-  luaL_checktype(L, 1, LUA_TBOOLEAN);
+  luaL_checktype(L, 1, LUA_TSTRING);
 
-  int useStdStream = lua_toboolean(L, 1);
-  oms_logToStdStream(useStdStream);
+  const char* filename = lua_tostring(L, 1);
+  oms_setLogFile(filename);
   return 0;
 }
 
@@ -525,7 +525,7 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(initialize);
   REGISTER_LUA_CALL(instantiateFMU);
   REGISTER_LUA_CALL(loadModel);
-  REGISTER_LUA_CALL(logToStdStream);
+  REGISTER_LUA_CALL(setLogFile);
   REGISTER_LUA_CALL(newModel);
   REGISTER_LUA_CALL(reset);
   REGISTER_LUA_CALL(setCommunicationInterval);

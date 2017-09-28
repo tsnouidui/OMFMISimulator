@@ -380,9 +380,9 @@ void oms_setSolverMethod(void* model, const char* instanceName, const char* meth
   pModel->SetSolverMethod(instanceName, method);
 }
 
-void oms_logToStdStream(int useStdStream)
+void oms_setLogFile(const char* filename)
 {
-  Log::getInstance().DumpToStdStream(useStdStream != 0);
+  Log::getInstance().setLogFile(filename);
 }
 
 const char* oms_getVersion()

@@ -51,24 +51,47 @@ std::string TimeStr()
   return std::string(buffer);
 }
 
-Log::Log()
+Log::Log() : filename(""), useStdStream(true), initialized(false)
+{
+}
+
+void Log::initialize()
 {
   numWarnings = 0;
   numErrors = 0;
-  logFile.open("omsllog.txt");
+  initialized = true;
+
+  if (!useStdStream)
+    logFile.open(filename.c_str());
   Info("Initializing logging (" + std::string(oms_git_version) + ")");
 }
 
 Log::~Log()
 {
+  terminate();
+}
+
+void Log::terminate()
+{
+  if (numWarnings + numErrors > 0)
+  {
+    Info(to_string(numWarnings) + " warnings");
+    Info(to_string(numErrors) + " errors");
+  }
+
   Info("Logging completed properly");
-  logFile.close();
-  //cout << "Logging information has been saved to \"omsllog.txt\"" << endl;
+
+  if (!useStdStream)
+    logFile.close();
+
   if (numWarnings + numErrors > 0)
   {
     cout << "  " << numWarnings << " warnings" << endl;
     cout << "  " << numErrors << " errors" << endl;
+    cout << "Logging information has been saved to \"" << filename.c_str() << "\"" << endl;
   }
+
+  initialized = false;
 }
 
 Log& Log::getInstance()
@@ -80,49 +103,90 @@ Log& Log::getInstance()
 
 void Log::Info(const std::string& msg)
 {
-  logFile << TimeStr() << " | info:    " << msg << endl;
+  if (!initialized)
+    initialize();
+
   if (useStdStream)
     cout << "info:    " << msg << endl;
+  else
+    logFile << TimeStr() << " | info:    " << msg << endl;
 }
 
 void Log::Debug(const std::string& msg)
 {
-  logFile << TimeStr() << " | debug:   " << msg << endl;
+  if (!initialized)
+    initialize();
+
   if (useStdStream)
     cout << "debug:   " << msg << endl;
+  else
+    logFile << TimeStr() << " | debug:   " << msg << endl;
 }
 
 void Log::Warning(const std::string& msg)
 {
+  if (!initialized)
+    initialize();
+
   numWarnings++;
-  logFile << TimeStr() << " | warning: " << msg << endl;
   if (useStdStream)
     cout << "warning: " << msg << endl;
+  else
+    logFile << TimeStr() << " | warning: " << msg << endl;
 }
 
 void Log::Error(const std::string& msg)
 {
+  if (!initialized)
+    initialize();
+
   numErrors++;
-  logFile << TimeStr() << " | error:   " << msg << endl;
-  cerr << "error:   " << msg << endl;
+  if (useStdStream)
+    cerr << "error:   " << msg << endl;
+  else
+    logFile << TimeStr() << " | error:   " << msg << endl;
 }
 
 void Log::Fatal(const std::string& msg)
 {
+  if (!initialized)
+    initialize();
+
   numErrors++;
-  logFile << TimeStr() << " | fatal:   " << msg << endl;
-  cerr << "fatal:   " << msg << endl;
+  if (useStdStream)
+    cerr << "fatal:   " << msg << endl;
+  else
+    logFile << TimeStr() << " | fatal:   " << msg << endl;
   exit(1);
 }
 
 void Log::Trace(const std::string& function, const std::string& file, const long line)
 {
-  logFile << TimeStr() << " | trace:   " << function << " (" << file << ":" << line << ")" << endl;
+  if (!initialized)
+    initialize();
+
   if (useStdStream)
     cout << "trace:   " << function << " (" << file << ":" << line << ")" << endl;
+  else
+    logFile << TimeStr() << " | trace:   " << function << " (" << file << ":" << line << ")" << endl;
 }
 
-void Log::DumpToStdStream(bool useStdStream)
+void Log::setLogFile(const std::string& filename)
 {
-  this->useStdStream = useStdStream;
+  if (initialized)
+  {
+    Error("Log::setLogFile can only be used before the logging is initialized.");
+    return;
+  }
+
+  if (filename.empty())
+  {
+    useStdStream = true;
+    this->filename = "";
+  }
+  else
+  {
+    useStdStream = false;
+    this->filename = filename;
+  }
 }

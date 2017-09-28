@@ -49,6 +49,7 @@ class Log
 {
 public:
   static Log& getInstance();
+
   void Info(const std::string& msg);
   void Debug(const std::string& msg);
   void Warning(const std::string& msg);
@@ -56,20 +57,25 @@ public:
   void Fatal(const std::string& msg);
   void Trace(const std::string& function, const std::string& file, const long line);
 
-  void DumpToStdStream(bool useStdStream);
+  void setLogFile(const std::string& filename);
 
 private:
   Log();
   ~Log();
 
+  void initialize();
+  void terminate();
+
   // Stop the compiler generating methods of copy the object
   Log(Log const& copy);            // Not Implemented
   Log& operator=(Log const& copy); // Not Implemented
 
+  bool initialized;
+  bool useStdStream;
+  std::string filename;
   std::ofstream logFile;
   unsigned int numWarnings;
   unsigned int numErrors;
-  bool useStdStream;
 };
 
 #define logInfo(msg)    Log::getInstance().Info(msg)

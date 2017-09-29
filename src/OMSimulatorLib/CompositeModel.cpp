@@ -743,7 +743,7 @@ void CompositeModel::solveAlgLoop(DirectedGraph& graph, const std::vector< std::
   delete[] res;
 
   if (it >= maxIterations)
-    logFatal("CompositeModel::solveAlgLoop: max. number of iterations (" + std::to_string(maxIterations) + ") exceeded");
+    logFatal("CompositeModel::solveAlgLoop: max. number of iterations (" + std::to_string(maxIterations) + ") exceeded at time = " + std::to_string(tcur));
 }
 
 void CompositeModel::updateInputs(DirectedGraph& graph)

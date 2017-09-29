@@ -77,18 +77,20 @@ void Log::terminate()
   {
     Info(to_string(numWarnings) + " warnings");
     Info(to_string(numErrors) + " errors");
+
+    if (!useStdStream)
+    {
+      cout << "info:    " << numWarnings << " warnings" << endl;
+      cout << "info:    " << numErrors << " errors" << endl;
+    }
   }
 
   Info("Logging completed properly");
 
   if (!useStdStream)
-    logFile.close();
-
-  if (numWarnings + numErrors > 0)
   {
-    cout << "  " << numWarnings << " warnings" << endl;
-    cout << "  " << numErrors << " errors" << endl;
-    cout << "Logging information has been saved to \"" << filename.c_str() << "\"" << endl;
+    logFile.close();
+    cout << "info:    " << "Logging information has been saved to \"" << filename.c_str() << "\"" << endl;
   }
 
   initialized = false;

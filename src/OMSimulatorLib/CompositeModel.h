@@ -59,6 +59,7 @@ public:
   bool getBoolean(const std::string& var);
   void addConnection(const std::string& from, const std::string& to);
   void exportDependencyGraph(const std::string& prefix);
+  void exportCompositeStructure(const std::string& prefix);
 
   void describe();
   void exportXML(const char* filename);

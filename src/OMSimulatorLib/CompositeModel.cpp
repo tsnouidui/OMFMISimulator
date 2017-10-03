@@ -311,6 +311,49 @@ void CompositeModel::exportDependencyGraph(const std::string& prefix)
   outputsGraph.dotExport(prefix + "_simulation.dot");
 }
 
+void CompositeModel::exportCompositeStructure(const std::string& prefix)
+{
+  logTrace();
+
+  /*
+   * #dot -Gsplines=none test.dot | neato -n -Gsplines=ortho -Tpng -otest.png
+   * digraph G
+   * {
+   *   graph [rankdir=LR, splines=ortho];
+   *
+   *   node[shape=record];
+   *   A [label="A", height=2, width=2];
+   *   B [label="B", height=2, width=2];
+   *
+   *   A -> B [label="A.y -> B.u"];
+   * }
+   */
+  std::ofstream dotFile(prefix + ".dot");
+  dotFile << "#dot -Gsplines=none " << prefix.c_str() << ".dot | neato -n -Gsplines=ortho -Tpng -o" << prefix.c_str() << ".png" << std::endl;
+  dotFile << "digraph G" << std::endl;
+  dotFile << "{" << std::endl;
+  dotFile << "  graph [rankdir=LR, splines=ortho];\n" << std::endl;
+  dotFile << "  node[shape=record];" << std::endl;
+
+  for (auto it=fmuInstances.begin(); it != fmuInstances.end(); it++)
+    dotFile << "  " << it->first << "[label=\"" << it->first << "\", height=2, width=2];" << std::endl;
+
+  dotFile << std::endl;
+  for (int i=0; i<outputsGraph.edges.size(); ++i)
+  {
+    int output = outputsGraph.edges[i].first;
+    int input = outputsGraph.edges[i].second;
+
+    if (outputsGraph.nodes[output].isOutput() && outputsGraph.nodes[input].isInput())
+    {
+      dotFile << "  " << outputsGraph.nodes[output].getFMUInstanceName() << " -> " << outputsGraph.nodes[input].getFMUInstanceName() << " [label=\"" << outputsGraph.nodes[output].getName() << " -> " << outputsGraph.nodes[input].getName() << "\"];" << std::endl;
+    }
+  }
+
+  dotFile << "}" << std::endl;
+  dotFile.close();
+}
+
 void CompositeModel::exportXML(const char* filename)
 {
   pugi::xml_document doc;

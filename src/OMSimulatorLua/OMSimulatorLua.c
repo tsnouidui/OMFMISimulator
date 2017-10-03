@@ -287,6 +287,20 @@ static int OMSimulatorLua_exportDependencyGraph(lua_State *L)
   return 0;
 }
 
+//void oms_exportCompositeStructure(void* model, const char* prefix);
+static int OMSimulatorLua_exportCompositeStructure(lua_State *L)
+{
+  if (lua_gettop(L) != 2)
+    return luaL_error(L, "expecting exactly 2 argument");
+  luaL_checktype(L, 1, LUA_TUSERDATA);
+  luaL_checktype(L, 2, LUA_TSTRING);
+
+  void *model = topointer(L, 1);
+  const char* prefix = lua_tostring(L, 2);
+  oms_exportCompositeStructure(model, prefix);
+  return 0;
+}
+
 //oms_status_t oms_initialize(void* model);
 static int OMSimulatorLua_initialize(lua_State *L)
 {
@@ -515,6 +529,7 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(describe);
   REGISTER_LUA_CALL(doSteps);
   REGISTER_LUA_CALL(exportDependencyGraph);
+  REGISTER_LUA_CALL(exportCompositeStructure);
   REGISTER_LUA_CALL(exportXML);
   REGISTER_LUA_CALL(getCurrentTime);
   REGISTER_LUA_CALL(getReal);

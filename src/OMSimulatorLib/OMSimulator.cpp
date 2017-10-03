@@ -265,6 +265,19 @@ void oms_exportDependencyGraph(void* model, const char* filename)
   pModel->exportDependencyGraph(filename);
 }
 
+void oms_exportCompositeStructure(void* model, const char* filename)
+{
+  logTrace();
+  if (!model)
+  {
+    logError("oms_exportCompositeStructure: invalid pointer");
+    return;
+  }
+
+  CompositeModel* pModel = (CompositeModel*)model;
+  pModel->exportCompositeStructure(filename);
+}
+
 oms_status_t oms_initialize(void* model)
 {
   logTrace();

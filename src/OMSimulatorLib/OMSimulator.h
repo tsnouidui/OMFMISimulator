@@ -167,6 +167,7 @@ void oms_describe(void* model);
 void oms_exportXML(void* model, const char* filename);
 void oms_importXML(void* model, const char* filename);
 void oms_exportDependencyGraph(void* model, const char* filename);
+void oms_exportCompositeStructure(void* model, const char* filename);
 
 /**
  * \brief Initialize the simulation of a given model.

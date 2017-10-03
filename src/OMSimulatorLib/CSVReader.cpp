@@ -42,6 +42,9 @@ CSVReader::CSVReader(const char* filename)
   std::ifstream file(filename);
   std::string line;
 
+  if (file.fail())
+    logFatal("MatReader::MatReader failed opening file \"" + std::string(filename) + "\"");
+
   // count number of lines
   unsigned int number_of_lines = 0;
   while (std::getline(file, line))

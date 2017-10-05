@@ -76,6 +76,22 @@ static int OMSimulatorLua_instantiateFMU(lua_State *L)
   return 0;
 }
 
+//void oms_instantiateTable(void* model, const char* filename, const char* instanceName);
+static int OMSimulatorLua_instantiateTable(lua_State *L)
+{
+  if (lua_gettop(L) != 3)
+    return luaL_error(L, "expecting exactly 3 arguments");
+  luaL_checktype(L, 1, LUA_TUSERDATA);
+  luaL_checktype(L, 2, LUA_TSTRING);
+  luaL_checktype(L, 3, LUA_TSTRING);
+
+  void *model = topointer(L, 1);
+  const char* filename = lua_tostring(L, 2);
+  const char* instanceName = lua_tostring(L, 3);
+  oms_instantiateTable(model, filename, instanceName);
+  return 0;
+}
+
 //void oms_setReal(void* model, const char* var, double value);
 static int OMSimulatorLua_setReal(lua_State *L)
 {
@@ -539,6 +555,7 @@ DLLEXPORT int luaopen_OMSimulatorLua(lua_State *L)
   REGISTER_LUA_CALL(importXML);
   REGISTER_LUA_CALL(initialize);
   REGISTER_LUA_CALL(instantiateFMU);
+  REGISTER_LUA_CALL(instantiateTable);
   REGISTER_LUA_CALL(loadModel);
   REGISTER_LUA_CALL(setLogFile);
   REGISTER_LUA_CALL(newModel);

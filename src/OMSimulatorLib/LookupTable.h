@@ -29,48 +29,31 @@
  *
  */
 
-#include "Variable.h"
-#include "Logging.h"
-#include "Settings.h"
-#include "FMUWrapper.h"
-#include "Util.h"
+#ifndef _OMS_LOOKUP_TABLE_H_
+#define _OMS_LOOKUP_TABLE_H_
 
-#include <fmilib.h>
-#include <JM/jm_portability.h>
+#include "ResultReader.h"
 
-#include <iostream>
 #include <string>
+#include <unordered_map>
 
-Variable::Variable(fmi2_import_variable_t *var, FMUWrapper* fmuInstance)
-  : fmuInstance(fmuInstance), is_state(false)
+class LookupTable
 {
-  // extract the attributes
-  name = fmi2_import_get_variable_name(var);
-  description = fmi2_import_get_variable_description(var) ? fmi2_import_get_variable_description(var) : "";
-  trim(description);
-  fmuInstanceName = fmuInstance->getFMUInstanceName();
-  vr = fmi2_import_get_variable_vr(var);
-  causality = fmi2_import_get_causality(var);
-  initialProperty = fmi2_import_get_initial(var);
-  baseType = fmi2_import_get_variable_base_type(var);
-}
+public:
+  LookupTable();
+  ~LookupTable();
 
-Variable::~Variable()
-{
-}
+  bool open(const std::string& filename);
+  void close();
 
-FMUWrapper* Variable::getFMUInstance() const
-{
-  return fmuInstance;
-}
+  double getValue(const std::string& var, const double time);
 
-bool operator==(const Variable& v1, const Variable& v2)
-{
-  return v1.name == v2.name &&
-    v1.fmuInstanceName == v2.fmuInstanceName &&
-    v1.vr == v2.vr;
-}
-bool operator!=(const Variable& v1, const Variable& v2)
-{
-  return !(v1 == v2);
-}
+  const std::string& getFilename() const {return filename;}
+
+private:
+  ResultReader *resultReader;
+  std::unordered_map<std::string, ResultReader::Series*> series;
+  std::string filename;
+};
+
+#endif

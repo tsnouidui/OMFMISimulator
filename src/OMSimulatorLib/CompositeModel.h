@@ -32,16 +32,18 @@
 #ifndef _OMS_MODEL_H_
 #define _OMS_MODEL_H_
 
-#include "FMUWrapper.h"
 #include "DirectedGraph.h"
-#include "Settings.h"
+#include "FMUWrapper.h"
+#include "LookupTable.h"
 #include "ResultWriter.h"
+#include "Settings.h"
 #include "Types.h"
 
 #include <fmilib.h>
+
+#include <deque>
 #include <string>
 #include <unordered_map>
-#include <deque>
 
 class CompositeModel
 {
@@ -51,7 +53,9 @@ public:
   ~CompositeModel();
 
   void instantiateFMU(const std::string& filename, const std::string& instanceName);
+  void instantiateTable(const std::string& filename, const std::string& instanceName);
   void setReal(const std::string& var, double value);
+  bool setRealInput(Variable& var, double value);
   void setInteger(const std::string& var, int value);
   void setBoolean(const std::string& var, bool value);
   double getReal(const std::string& var);
@@ -95,6 +99,8 @@ private:
   Settings settings;
   ResultWriter *resultFile;
   std::unordered_map<std::string, FMUWrapper*> fmuInstances;
+  std::unordered_map<std::string, LookupTable*> lookupTables;
+  std::vector< std::pair<std::string, Variable*> > lookupAssignments;
   std::unordered_map<std::string, double> realParameterList;
   std::unordered_map<std::string, int> integerParameterList;
   std::unordered_map<std::string, bool> booleanParameterList;
@@ -104,8 +110,8 @@ private:
   oms_modelState_t modelState;
   double communicationInterval;
 
-  std::vector<std::string>  interfaceNames;
-  std::vector<std::string>  interfaceVariables;
+  std::vector<std::string> interfaceNames;
+  std::vector<std::string> interfaceVariables;
 };
 
 #endif

@@ -29,31 +29,32 @@
  *
  */
 
+#include "Clocks.h"
 #include "CompositeModel.h"
-#include "Logging.h"
+#include "CSVWriter.h"
 #include "DirectedGraph.h"
+#include "Logging.h"
+#include "LookupTable.h"
+#include "MATWriter.h"
+#include "ResultWriter.h"
 #include "Settings.h"
 #include "Types.h"
 #include "Util.h"
-#include "Clocks.h"
-#include "ResultWriter.h"
-#include "CSVWriter.h"
-#include "MATWriter.h"
 
 #include <fmilib.h>
 #include <JM/jm_portability.h>
 
+#include <algorithm>
+#include <cstdlib>
+#include <deque>
+#include <fstream>
 #include <iostream>
-#include <vector>
+#include <regex>
+#include <sstream>
+#include <stdlib.h>
 #include <string>
 #include <unordered_map>
-#include <sstream>
-#include <fstream>
-#include <cstdlib>
-#include <stdlib.h>
-#include <deque>
-#include <regex>
-#include <algorithm>
+#include <vector>
 
 #include <boost/filesystem.hpp>
 
@@ -85,8 +86,10 @@ CompositeModel::CompositeModel(const char* descriptionPath)
 CompositeModel::~CompositeModel()
 {
   logTrace();
-  std::unordered_map<std::string, FMUWrapper*>::iterator it;
-  for (it=fmuInstances.begin(); it != fmuInstances.end(); it++)
+  for (auto it=fmuInstances.begin(); it != fmuInstances.end(); it++)
+    delete it->second;
+
+  for (auto it=lookupTables.begin(); it != lookupTables.end(); it++)
     delete it->second;
 }
 
@@ -98,6 +101,18 @@ void CompositeModel::instantiateFMU(const std::string& filename, const std::stri
   fmuInstances[instanceName] = new FMUWrapper(*this, filename, instanceName);
   outputsGraph.includeGraph(fmuInstances[instanceName]->getOutputsGraph());
   initialUnknownsGraph.includeGraph(fmuInstances[instanceName]->getInitialUnknownsGraph());
+
+  OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
+}
+
+void CompositeModel::instantiateTable(const std::string& filename, const std::string& instanceName)
+{
+  logTrace();
+  OMS_TIC(globalClocks, GLOBALCLOCK_INSTANTIATION);
+
+  LookupTable *table = new LookupTable();
+  table->open(filename);
+  lookupTables[instanceName] = table;
 
   OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
 }
@@ -131,6 +146,11 @@ void CompositeModel::setReal(const std::string& var, double value)
     fmuInstances[fmuInstance]->setRealInput(fmuVar, value);
   else
     logError("CompositeModel::setReal failed");
+}
+
+bool CompositeModel::setRealInput(Variable& var, double value)
+{
+  return var.getFMUInstance()->setRealInput(var, value);
 }
 
 void CompositeModel::setInteger(const std::string& var, int value)
@@ -268,38 +288,55 @@ void CompositeModel::addConnection(const std::string& from, const std::string& t
   std::getline(var2_, fmuInstance2, '.');
   std::getline(var2_, fmuVar2);
 
-  if (fmuInstances.find(fmuInstance1) == fmuInstances.end())
+  // check if fmuInstance1 is actually a lookup table
+  if (lookupTables.find(fmuInstance1) != lookupTables.end())
   {
-    logError("CompositeModel::addConnection: FMU instance \"" + fmuInstance1 + "\" doesn't exist in model");
-    OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
-    return;
-  }
+    if (fmuInstances.find(fmuInstance2) == fmuInstances.end())
+    {
+      logError("CompositeModel::addConnection: FMU instance \"" + fmuInstance2 + "\" doesn't exist in model");
+      OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
+      return;
+    }
 
-  if (fmuInstances.find(fmuInstance2) == fmuInstances.end())
+    Variable *var2 = fmuInstances[fmuInstance2]->getVariable(fmuVar2);
+
+    lookupAssignments.push_back(std::pair<std::string, Variable*>(from, var2));
+  }
+  else
   {
-    logError("CompositeModel::addConnection: FMU instance \"" + fmuInstance2 + "\" doesn't exist in model");
-    OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
-    return;
-  }
+    if (fmuInstances.find(fmuInstance1) == fmuInstances.end())
+    {
+      logError("CompositeModel::addConnection: FMU instance \"" + fmuInstance1 + "\" doesn't exist in model");
+      OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
+      return;
+    }
 
-  Variable *var1 = fmuInstances[fmuInstance1]->getVariable(fmuVar1);
-  Variable *var2 = fmuInstances[fmuInstance2]->getVariable(fmuVar2);
+    if (fmuInstances.find(fmuInstance2) == fmuInstances.end())
+    {
+      logError("CompositeModel::addConnection: FMU instance \"" + fmuInstance2 + "\" doesn't exist in model");
+      OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
+      return;
+    }
 
-  if (!var1)
-  {
-    logError("CompositeModel::addConnection: output \"" + fmuInstance1 + "." + fmuVar1 + "\" doesn't exist");
-    OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
-    return;
-  }
-  if (!var2)
-  {
-    logError("CompositeModel::addConnection: input \"" + fmuInstance2 + "." + fmuVar2 + "\" doesn't exist");
-    OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
-    return;
-  }
+    Variable *var1 = fmuInstances[fmuInstance1]->getVariable(fmuVar1);
+    Variable *var2 = fmuInstances[fmuInstance2]->getVariable(fmuVar2);
 
-  outputsGraph.addEdge(*var1, *var2);
-  initialUnknownsGraph.addEdge(*var1, *var2);
+    if (!var1)
+    {
+      logError("CompositeModel::addConnection: output \"" + fmuInstance1 + "." + fmuVar1 + "\" doesn't exist");
+      OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
+      return;
+    }
+    if (!var2)
+    {
+      logError("CompositeModel::addConnection: input \"" + fmuInstance2 + "." + fmuVar2 + "\" doesn't exist");
+      OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
+      return;
+    }
+
+    outputsGraph.addEdge(*var1, *var2);
+    initialUnknownsGraph.addEdge(*var1, *var2);
+  }
 
   OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
 }
@@ -379,12 +416,19 @@ void CompositeModel::exportXML(const char* filename)
   simulationparams.append_attribute("communicationInterval") = communicationInterval.c_str();
   simulationparams.append_attribute("variableFilter") = ".*";
 
-  // add list of FMUs
-  std::unordered_map<std::string, FMUWrapper*>::iterator it;
-  for (it=fmuInstances.begin(); it != fmuInstances.end(); it++)
+  // list all lookup tables
+  for (auto it=lookupTables.begin(); it != lookupTables.end(); it++)
   {
-    std::string getfmu= it->second->getFMUPath();
-    std::string getinstance= it->second->getFMUInstanceName();
+    pugi::xml_node submodel = submodels.append_child("SubModel");
+    submodel.append_attribute("Name") = it->first.c_str();
+    submodel.append_attribute("ModelFile") = it->second->getFilename().c_str();
+  }
+
+  // list all FMUs
+  for (auto it=fmuInstances.begin(); it != fmuInstances.end(); it++)
+  {
+    std::string getfmu = it->second->getFMUPath();
+    std::string getinstance = it->second->getFMUInstanceName();
     pugi::xml_node submodel = submodels.append_child("SubModel");
     submodel.append_attribute("Name") = getinstance.c_str();
     submodel.append_attribute("ModelFile") = getfmu.c_str();
@@ -393,6 +437,15 @@ void CompositeModel::exportXML(const char* filename)
       std::string getsolver= it->second->GetSolverMethodString();
       submodel.append_attribute("solver") = getsolver.c_str();
     }
+  }
+
+  for (int i=0; i<lookupAssignments.size(); ++i)
+  {
+    std::string tofmu = lookupAssignments[i].second->getFMUInstanceName() + '.' + lookupAssignments[i].second->getName();
+
+    pugi::xml_node connection = connections.append_child("Connection");
+    connection.append_attribute("From") = lookupAssignments[i].first.c_str();
+    connection.append_attribute("To") = tofmu.c_str();
   }
 
   // add connection information
@@ -494,19 +547,16 @@ void CompositeModel::importXML(const char* filename)
   for(pugi::xml_node_iterator it = root.begin(); it != root.end(); ++it)
   {
     std::string name = it->name();
-    if(name == "Interface") {
+    if(name == "Interface")
+    {
       std::string InterfaceName, VariableName;
       for (pugi::xml_attribute_iterator ait = it->attributes_begin(); ait != it->attributes_end(); ++ait)
       {
         std::string value =ait->name();
         if (value == "Name")
-        {
           InterfaceName = ait->value();
-        }
         if (value == "Variable")
-        {
           VariableName = ait->value();
-        }
       }
 
       interfaceNames.push_back(InterfaceName);
@@ -520,6 +570,7 @@ void CompositeModel::importXML(const char* filename)
     std::string instancename;
     std::string filename;
     std::string solvername;
+    std::string type;
     for (pugi::xml_attribute_iterator ait = it->attributes_begin(); ait != it->attributes_end(); ++ait)
     {
       std::string value =ait->name();
@@ -527,17 +578,25 @@ void CompositeModel::importXML(const char* filename)
       {
         instancename = ait->value();
       }
-      if (value == "ModelFile")
+      else if (value == "ModelFile")
       {
         filename = ait->value();
+
+        if (filename.length() > 5)
+          type = filename.substr(filename.length() - 4);
+        else
+          logFatal("CompositeModel::importXML: Invalid filename: " + filename);
       }
-      if (value == "solver")
+      else if (value == "solver")
       {
         solvername = ait->value();
       }
     }
 
-    instantiateFMU(filename, instancename);
+    if (type == ".fmu" || type == ".FMU")
+      instantiateFMU(filename, instancename);
+    else
+      instantiateTable(filename, instancename);
     if (solvername != "")
     {
       fmuInstances[instancename]->SetSolverMethod(solvername);
@@ -660,6 +719,13 @@ void CompositeModel::describe()
         std::cout << "    - parameter " << allVariables[j].getName() << std::endl;
   }
 
+  std::cout << "\n# Lookup tables" << std::endl;
+  for (auto it=lookupTables.begin(); it != lookupTables.end(); ++it)
+  {
+    std::cout << it->first << std::endl;
+    std::cout << "  - path: " << it->second->getFilename() << std::endl;
+  }
+
   std::cout << "\n# Simulation settings" << std::endl;
   std::cout << "  - start time: " << settings.GetStartTime() << std::endl;
   std::cout << "  - stop time: " << settings.GetStopTime() << std::endl;
@@ -669,7 +735,10 @@ void CompositeModel::describe()
   //std::cout << "  - temp directory: " << settings.GetTempDirectory() << std::endl;
 
   std::cout << "\n# Composite structure" << std::endl;
-  std::cout << "## Initialization" << std::endl;
+  std::cout << "## External inputs" << std::endl;
+  for(int i=0; i<lookupAssignments.size(); i++)
+    std::cout << lookupAssignments[i].first << " -> " << lookupAssignments[i].second->getFMUInstanceName() << "." << lookupAssignments[i].second->getName() << std::endl;
+  std::cout << "\n## Initialization" << std::endl;
   // calculate sorting
   const std::vector< std::vector< std::pair<int, int> > >& connectionsInitialUnknowns = initialUnknownsGraph.getSortedConnections();
   for(int i=0; i<connectionsInitialUnknowns.size(); i++)
@@ -766,8 +835,7 @@ void CompositeModel::solveAlgLoop(DirectedGraph& graph, const std::vector< std::
     for (int i=0; i<size; ++i)
     {
       int input = SCC[i].second;
-      const std::string& inputFMU = graph.nodes[input].getFMUInstanceName();
-      fmuInstances[inputFMU]->setRealInput(graph.nodes[input], res[i]);
+      setRealInput(graph.nodes[input], res[i]);
     }
 
     // calculate residuals
@@ -795,9 +863,22 @@ void CompositeModel::updateInputs(DirectedGraph& graph)
 {
   OMS_TIC(globalClocks, GLOBALCLOCK_COMMUNICATION);
 
-  const std::vector< std::vector< std::pair<int, int> > >& sortedConnections = graph.getSortedConnections();
+  // lookup tables
+  for(int i=0; i<lookupAssignments.size(); i++)
+  {
+    std::stringstream name_(lookupAssignments[i].first);
+    std::string lookupInstance;
+    std::string var;
+
+    std::getline(name_, lookupInstance, '.');
+    std::getline(name_, var);
+
+    double value = lookupTables[lookupInstance]->getValue(var, tcur);
+    setRealInput(*lookupAssignments[i].second, value);
+  }
 
   // input = output
+  const std::vector< std::vector< std::pair<int, int> > >& sortedConnections = graph.getSortedConnections();
   for(int i=0; i<sortedConnections.size(); i++)
   {
     if (sortedConnections[i].size() == 1)
@@ -806,10 +887,10 @@ void CompositeModel::updateInputs(DirectedGraph& graph)
       int input = sortedConnections[i][0].second;
       const std::string& outputFMU = graph.nodes[output].getFMUInstanceName();
       //std::string& outputVar = graph.nodes[output].getName();
-      const std::string& inputFMU = graph.nodes[input].getFMUInstanceName();
+      //const std::string& inputFMU = graph.nodes[input].getFMUInstanceName();
       //std::string& inputVar = graph.nodes[input].getName();
       double value = fmuInstances[outputFMU]->getReal(graph.nodes[output]);
-      fmuInstances[inputFMU]->setRealInput(graph.nodes[input], value);
+      setRealInput(graph.nodes[input], value);
       //std::cout << inputFMU << "." << inputVar << " = " << outputFMU << "." << outputVar << std::endl;
     }
     else

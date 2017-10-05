@@ -83,6 +83,19 @@ void oms_instantiateFMU(void* model, const char* filename, const char* instanceN
   pModel->instantiateFMU(filename, instanceName);
 }
 
+void oms_instantiateTable(void* model, const char* filename, const char* instanceName)
+{
+  logTrace();
+  if (!model)
+  {
+    logError("oms_instantiateTable: invalid pointer");
+    return;
+  }
+
+  CompositeModel* pModel = (CompositeModel*)model;
+  pModel->instantiateTable(filename, instanceName);
+}
+
 void oms_setReal(void *model, const char *var, double value)
 {
   logTrace();

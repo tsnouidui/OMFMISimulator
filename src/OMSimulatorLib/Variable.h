@@ -66,7 +66,7 @@ public:
 
   const std::string& getName() const {return name;}
   const std::string& getFMUInstanceName() const {return fmuInstanceName;}
-  const FMUWrapper* getFMUInstance() const;
+  FMUWrapper* getFMUInstance() const;
   fmi2_value_reference_t getValueReference() const {return vr;}
   fmi2_base_type_enu_t getBaseType() const {return baseType;}
   const std::string& getDescription() const {return description;}

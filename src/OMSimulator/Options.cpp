@@ -51,6 +51,8 @@ ProgramOptions::ProgramOptions()
   useStopTime = false;
   tolerance = 1e-6;
   useTolerance = false;
+  communicationInterval = 1e-1;
+  useCommunicationInterval = false;
 }
 
 bool ProgramOptions::load_flags(int argc, char** argv)
@@ -63,6 +65,7 @@ bool ProgramOptions::load_flags(int argc, char** argv)
   visible_options.add_options()
   ("describe,d", "Displays brief summary of given model")
   ("help,h", "Displays the help text")
+  ("interval,i", boost::program_options::value<double>(&communicationInterval), "Specifies the communication interval size.")
   ("logFile,l", boost::program_options::value<std::string>(&logfile), "Specifies the logfile (stdout is used if no log file is specified).")
   ("resultFile,r", boost::program_options::value<std::string>(&resultFile), "Specifies the name of the output result file")
   ("startTime,s", boost::program_options::value<double>(&startTime), "Specifies the start time.")
@@ -153,6 +156,9 @@ bool ProgramOptions::load_flags(int argc, char** argv)
 
   if (vm.count("tolerance"))
     useTolerance = true;
+
+  if (vm.count("interval"))
+    useCommunicationInterval = true;
 
   return true;
 }

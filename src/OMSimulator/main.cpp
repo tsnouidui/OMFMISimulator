@@ -95,6 +95,8 @@ int main(int argc, char *argv[])
       oms_setStopTime(pModel, options.stopTime);
     if (options.useTolerance)
       oms_setTolerance(pModel, options.tolerance);
+    if (options.useCommunicationInterval)
+      oms_setCommunicationInterval(pModel, options.communicationInterval);
 
     if (options.describe)
     {
@@ -123,6 +125,8 @@ int main(int argc, char *argv[])
       std::cout << "Ignoring option '--tolerance'" << std::endl;
     if (options.describe)
       std::cout << "Ignoring option '--describe'" << std::endl;
+    if (options.useCommunicationInterval)
+      std::cout << "Ignoring option '--interval='" << std::endl;
 
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);

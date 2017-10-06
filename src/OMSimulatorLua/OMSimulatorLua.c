@@ -119,7 +119,7 @@ static int OMSimulatorLua_setInteger(lua_State *L)
 
   void *model = topointer(L, 1);
   const char *var = lua_tostring(L, 2);
-  int value = lua_tonumber(L, 3);
+  int value = lua_tointeger(L, 3);
   oms_setInteger(model, var, value);
   return 0;
 }
@@ -135,7 +135,7 @@ static int OMSimulatorLua_setBoolean(lua_State *L)
 
   void *model = topointer(L, 1);
   const char *var = lua_tostring(L, 2);
-  int value = lua_tonumber(L, 3);
+  int value = lua_tointeger(L, 3);
   oms_setBoolean(model, var, value);
   return 0;
 }

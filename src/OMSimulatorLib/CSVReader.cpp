@@ -162,7 +162,7 @@ ResultReader::Series* CSVReader::getSeries(const char* var)
   series->time = new double[series->length];
   series->value = new double[series->length];
 
-  for (int row = 0; row < series->length; ++row)
+  for (unsigned int row = 0; row < series->length; ++row)
   {
     series->time[row] = data[row * names.size()];
     series->value[row] = data[row * names.size() + index];

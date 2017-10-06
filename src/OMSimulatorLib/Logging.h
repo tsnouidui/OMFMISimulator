@@ -71,7 +71,6 @@ private:
   Log(Log const& copy);            // Not Implemented
   Log& operator=(Log const& copy); // Not Implemented
 
-  bool processTerminating;
   bool initialized;
   bool useStdStream;
   std::string filename;

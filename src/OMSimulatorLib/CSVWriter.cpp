@@ -52,6 +52,7 @@ bool CSVWriter::createFile(const std::string& filename, double startTime, double
     return false;
 
   pFile = fopen(filename.c_str(), "w");
+  fprintf(pFile, "\"sep=,\"\n");
   fprintf(pFile, "\"time\"");
 
   for (int i = 0; i < signals.size(); ++i)

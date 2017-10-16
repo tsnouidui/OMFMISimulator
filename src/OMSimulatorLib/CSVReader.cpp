@@ -47,14 +47,27 @@ CSVReader::CSVReader(const char* filename)
 
   // count number of lines
   unsigned int number_of_lines = 0;
+  bool usingSepHeader = false;
   while (std::getline(file, line))
+  {
     if (!line.empty())
-      ++number_of_lines;
+    {
+      if(number_of_lines == 0 && line.substr(0, 5) =="\"sep=")
+        usingSepHeader = true;
+      else
+        ++number_of_lines;
+    }
+  }
   length = number_of_lines-1;
 
   // read first line
   file.clear();
   file.seekg(0, std::ios::beg);
+
+  // TODO: process sep header properly
+  if (usingSepHeader)
+    std::getline(file, line);
+
   std::getline(file, line);
   bool quoteSign=false;
   std::string name;

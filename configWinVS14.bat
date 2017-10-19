@@ -59,5 +59,3 @@ COPY 3rdParty\fmil\install\win\lib\fmilib_shared.dll install\bin
 echo # copy lua
 COPY 3rdParty\lua\install\win\lua.dll install\bin
 COPY 3rdParty\lua\install\win\lua.exe install\bin
-
-pause

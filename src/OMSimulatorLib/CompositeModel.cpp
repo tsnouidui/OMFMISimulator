@@ -334,8 +334,24 @@ void CompositeModel::addConnection(const std::string& from, const std::string& t
       return;
     }
 
-    outputsGraph.addEdge(*var1, *var2);
-    initialUnknownsGraph.addEdge(*var1, *var2);
+    if (var1->isOutput() && var2->isInput())
+    {
+      outputsGraph.addEdge(*var1, *var2);
+      initialUnknownsGraph.addEdge(*var1, *var2);
+    }
+    else if (var2->isOutput() && var1->isInput())
+    {
+      outputsGraph.addEdge(*var2, *var1);
+      initialUnknownsGraph.addEdge(*var2, *var1);
+    }
+    else
+    {
+      logError("CompositeModel::addConnection: Connections can only be made between an output and an input:");
+      logInfo("- causality of \"" + from + "\" is " + var1->getCausalityString());
+      logInfo("- causality of \"" + to + "\" is " + var2->getCausalityString());
+      OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);
+      return;
+    }
   }
 
   OMS_TOC(globalClocks, GLOBALCLOCK_INSTANTIATION);

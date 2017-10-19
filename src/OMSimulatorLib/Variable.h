@@ -75,6 +75,8 @@ public:
   bool isTypeInteger() const {return fmi2_base_type_int == baseType;}
   bool isTypeBoolean() const {return fmi2_base_type_bool == baseType;}
 
+  std::string getCausalityString() {return std::string(fmi2_causality_to_string(causality));}
+
 protected:
   std::string name;
   std::string description;

@@ -31,12 +31,18 @@
 
 #include "MatVer4.h"
 
-#include <climits>
-#include <stdexcept>
+#include <assert.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-const bool isBigEndian()
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+const char isBigEndian()
 {
   union
   {
@@ -46,103 +52,66 @@ const bool isBigEndian()
   return (1 == test.i8[0]);
 }
 
-unsigned int size2uint(size_t value)
+size_t sizeofMatVer4Type(MatVer4Type_t type)
 {
-  if (value > UINT_MAX)
-    throw std::out_of_range("Converting 'size_t' to 'unsigned int' failed.");
-  return static_cast<unsigned int>(value);
-}
-
-int writeMatVer4Matrix(FILE* file, const char* name, size_t rows, size_t cols, const void* matrixData, MatVer4Type_t type)
-{
-  struct MatVer4Header
-  {
-    unsigned int type;
-    unsigned int mrows;
-    unsigned int ncols;
-    unsigned int imagf;
-    unsigned int namelen;
-  } header;
-
-  size_t size;
   switch (type)
   {
   case MatVer4Type_DOUBLE:
-    size = sizeof(double);
-    break;
+    return sizeof(double);
+  case MatVer4Type_SINGLE:
+    return sizeof(float);
   case MatVer4Type_INT32:
-    size = sizeof(int32_t);
-    break;
+    return sizeof(int32_t);
   case MatVer4Type_CHAR:
-    size = sizeof(uint8_t);
-    break;
+    return sizeof(uint8_t);
   default:
-    return -1;
+    // Should never get here!
+    assert(0);
+    return 0;
   }
+}
+
+void writeMatVer4Matrix(FILE* file, const char* name, size_t rows, size_t cols, const void* matrixData, MatVer4Type_t type)
+{
+  MatVer4Header header;
+  size_t size = sizeofMatVer4Type(type);
 
   header.type = (isBigEndian() ? 1000 : 0) + type;
-  header.mrows = size2uint(rows);
-  header.ncols = size2uint(cols);
+  header.mrows = (unsigned int) rows;
+  header.ncols = (unsigned int) cols;
   header.imagf = 0;
   header.namelen = (unsigned int) strlen(name) + 1;
 
   fwrite(&header, sizeof(MatVer4Header), 1, file);
-  fwrite(name, sizeof(char), header.namelen, file);
+  fwrite(name, sizeof(uint8_t), header.namelen, file);
   fwrite(matrixData, size, rows * cols, file);
-
-  return 0;
 }
 
-int appendMatVer4Matrix(FILE* file, long position, const char* name, size_t rows, size_t cols, const void* matrixData, MatVer4Type_t type)
+void appendMatVer4Matrix(FILE* file, long position, const char* name, size_t rows, size_t cols, const void* matrixData, MatVer4Type_t type)
 {
-  struct MatVer4Header
-  {
-    unsigned int type;
-    unsigned int mrows;
-    unsigned int ncols;
-    unsigned int imagf;
-    unsigned int namelen;
-  } header;
-
-  size_t size;
-  switch (type)
-  {
-  case MatVer4Type_DOUBLE:
-    size = sizeof(double);
-    break;
-  case MatVer4Type_INT32:
-    size = sizeof(int32_t);
-    break;
-  case MatVer4Type_CHAR:
-    size = sizeof(uint8_t);
-    break;
-  default:
-    return -1;
-  }
+  MatVer4Header header;
+  size_t size = sizeofMatVer4Type(type);
 
   long eof = ftell(file);
   fseek(file, position, SEEK_SET);
   fread(&header, sizeof(MatVer4Header), 1, file);
-  if (header.type != (isBigEndian() ? 1000 : 0) + type)
-    return -1;
-  if (header.mrows != rows)
-    return -1;
-  header.ncols += size2uint(cols);
-  if (header.imagf != 0)
-    return -1;
-  if (header.namelen != strlen(name) + 1)
-    return -1;
+
+  assert(header.type == (isBigEndian() ? 1000 : 0) + type);
+  assert(header.mrows == rows);
+  assert(header.imagf == 0);
+  assert(header.namelen == strlen(name) + 1);
+
+  header.ncols += (unsigned int) cols;
 
   fseek(file, position, SEEK_SET);
   fwrite(&header, sizeof(MatVer4Header), 1, file);
   fseek(file, eof, SEEK_SET);
   fwrite(matrixData, size, rows * cols, file);
-  return 0;
 }
 
 MatVer4Matrix* readMatVer4Matrix(FILE* file)
 {
-  MatVer4Matrix *matrix = new MatVer4Matrix();
+  MatVer4Matrix *matrix = (MatVer4Matrix*) malloc(sizeof(MatVer4Matrix));
   if (!matrix)
     return NULL;
 
@@ -151,30 +120,26 @@ MatVer4Matrix* readMatVer4Matrix(FILE* file)
   // skip name
   fseek(file, matrix->header.namelen, SEEK_CUR);
 
-  size_t size;
-  switch (matrix->header.type % 100)
-  {
-  case MatVer4Type_DOUBLE:
-    size = sizeof(double);
-    break;
-  case MatVer4Type_INT32:
-    size = sizeof(int32_t);
-    break;
-  case MatVer4Type_CHAR:
-    size = sizeof(uint8_t);
-    break;
-  default:
-    delete matrix;
-    return NULL;
-  }
-
-  matrix->data = new char[matrix->header.mrows*matrix->header.ncols*size];
+  MatVer4Type_t type = (MatVer4Type_t) (matrix->header.type % 100);
+  size_t size = sizeofMatVer4Type(type);
+  matrix->data = malloc(matrix->header.mrows * matrix->header.ncols * size);
   fread(matrix->data, size, matrix->header.mrows*matrix->header.ncols, file);
 
   return matrix;
 }
 
-int skipMatVer4Matrix(FILE* file)
+void freeMatVer4Matrix(MatVer4Matrix** matrix)
+{
+  if (*matrix)
+  {
+    if ((*matrix)->data)
+      free((*matrix)->data);
+    free(*matrix);
+    *matrix = NULL;
+  }
+}
+
+void skipMatVer4Matrix(FILE* file)
 {
   MatVer4Header header;
   fread(&header, sizeof(MatVer4Header), 1, file);
@@ -182,34 +147,12 @@ int skipMatVer4Matrix(FILE* file)
   // skip name
   fseek(file, header.namelen, SEEK_CUR);
 
-  size_t size;
-  switch (header.type % 100)
-  {
-  case MatVer4Type_DOUBLE:
-    size = sizeof(double);
-    break;
-  case MatVer4Type_INT32:
-    size = sizeof(int32_t);
-    break;
-  case MatVer4Type_CHAR:
-    size = sizeof(uint8_t);
-    break;
-  default:
-    return -1;
-  }
-
   // skip data
+  MatVer4Type_t type = (MatVer4Type_t) (header.type % 100);
+  size_t size = sizeofMatVer4Type(type);
   fseek(file, header.mrows*header.ncols*size, SEEK_CUR);
-  return 0;
 }
 
-void deleteMatVer4Matrix(MatVer4Matrix** matrix)
-{
-  if (*matrix)
-  {
-    if ((*matrix)->data)
-      delete[] ((char*)(*matrix)->data);
-    delete *matrix;
-    *matrix = NULL;
-  }
+#ifdef __cplusplus
 }
+#endif

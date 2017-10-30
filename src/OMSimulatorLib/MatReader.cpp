@@ -53,10 +53,10 @@ MatReader::MatReader(const char* filename)
 
 MatReader::~MatReader()
 {
-  deleteMatVer4Matrix(&name);
-  deleteMatVer4Matrix(&dataInfo);
-  deleteMatVer4Matrix(&data_1);
-  deleteMatVer4Matrix(&data_2);
+  freeMatVer4Matrix(&name);
+  freeMatVer4Matrix(&dataInfo);
+  freeMatVer4Matrix(&data_1);
+  freeMatVer4Matrix(&data_2);
 }
 
 ResultReader::Series* MatReader::getSeries(const char* var)

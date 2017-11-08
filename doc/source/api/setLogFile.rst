@@ -1,6 +1,8 @@
 #CAPTION#
 setLogFile
 ----------
+
+This function sets the log file name.
 #END#
 
 #LUA#
@@ -22,4 +24,5 @@ setLogFile
 #END#
 
 #DESCRIPTION#
+If the filename is an empty string, then the logging information is dumped to stdout.
 #END#

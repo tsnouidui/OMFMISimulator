@@ -1,6 +1,8 @@
 #CAPTION#
 getCurrentTime
 --------------
+
+This function returns the current simulation time value.
 #END#
 
 #LUA#

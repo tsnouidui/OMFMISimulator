@@ -1,6 +1,8 @@
 #CAPTION#
 setTolerance
 ------------
+
+This function defines the tolerance of a given composite model.
 #END#
 
 #LUA#
@@ -23,4 +25,5 @@ setTolerance
 #END#
 
 #DESCRIPTION#
+The tolerance is used for solving algebraic loops on a global level, as well as for the tolerance that is forwarded to all the FMUs.
 #END#

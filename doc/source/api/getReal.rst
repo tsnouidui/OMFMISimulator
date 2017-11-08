@@ -1,6 +1,8 @@
 #CAPTION#
 getReal
 -------
+
+This function returns a the value of a real variable.
 #END#
 
 #LUA#

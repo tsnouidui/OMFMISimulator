@@ -1,6 +1,8 @@
 #CAPTION#
 setTempDirectory
 ----------------
+
+This function defines the temp directory that is used for temporary files, e.g. extracted FMUs.
 #END#
 
 #LUA#

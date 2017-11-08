@@ -1,6 +1,8 @@
 #CAPTION#
 newModel
 --------
+
+This function creates a new object representing an empty composite model.
 #END#
 
 #LUA#

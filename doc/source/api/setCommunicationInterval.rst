@@ -1,6 +1,8 @@
 #CAPTION#
 setCommunicationInterval
 ------------------------
+
+This functions defines the communication interval of the given composite model.
 #END#
 
 #LUA#

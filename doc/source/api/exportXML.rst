@@ -1,6 +1,8 @@
 #CAPTION#
 exportXML
 ---------
+
+This function generates a xml file representing the given model. The xml file contains the FMU instances, connections, parameter and simulation settings.
 #END#
 
 #LUA#

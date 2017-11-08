@@ -1,6 +1,8 @@
 #CAPTION#
 exportCompositeStructure
 ------------------------
+
+This function generates a dot file representing the composite structure of a given model.
 #END#
 
 #LUA#
@@ -23,4 +25,7 @@ exportCompositeStructure
 #END#
 
 #DESCRIPTION#
+The dot file can be translated to an png file using this command:
+
+`dot -Gsplines=none <model.dot> | neato -n -Gsplines=ortho -Tpng -o<model.png>`
 #END#

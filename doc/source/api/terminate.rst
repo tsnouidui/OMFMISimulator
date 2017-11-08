@@ -1,6 +1,8 @@
 #CAPTION#
 terminate
 ---------
+
+This function terminates a simulation and resets all FMU instances.
 #END#
 
 #LUA#

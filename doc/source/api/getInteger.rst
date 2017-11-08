@@ -1,6 +1,8 @@
 #CAPTION#
 getInteger
 ----------
+
+This function returns a the value of an integer variable.
 #END#
 
 #LUA#

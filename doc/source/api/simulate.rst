@@ -1,6 +1,8 @@
 #CAPTION#
 simulate
 --------
+
+This function performs the simulation from the current time value to the defined stop time.
 #END#
 
 #LUA#

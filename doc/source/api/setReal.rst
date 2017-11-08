@@ -1,6 +1,8 @@
 #CAPTION#
 setReal
 -------
+
+Set parameter and input values of type real.
 #END#
 
 #LUA#

@@ -1,6 +1,8 @@
 #CAPTION#
 setBoolean
 ----------
+
+Set parameter and input values of type boolean.
 #END#
 
 #LUA#

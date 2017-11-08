@@ -1,6 +1,8 @@
 #CAPTION#
 reset
 -----
+
+The FMUs go into the same state as after instantiation.
 #END#
 
 #LUA#

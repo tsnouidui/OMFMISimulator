@@ -1,6 +1,8 @@
 #CAPTION#
 unload
 ------
+
+This function releases all resources used for a given composite model.
 #END#
 
 #LUA#

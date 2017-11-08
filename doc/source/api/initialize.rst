@@ -1,6 +1,8 @@
 #CAPTION#
 initialize
 ----------
+
+This function initializes a given composite model. After this call, the model is in simulation mode.
 #END#
 
 #LUA#

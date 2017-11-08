@@ -1,6 +1,8 @@
 #CAPTION#
 instantiateTable
 ----------------
+
+This function instantiates a lookup table and makes it available under a given name.
 #END#
 
 #LUA#
@@ -24,4 +26,5 @@ instantiateTable
 #END#
 
 #DESCRIPTION#
+mat files and csv files can be used as lookup tables.
 #END#

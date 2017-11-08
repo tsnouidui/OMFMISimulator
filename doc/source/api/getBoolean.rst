@@ -1,6 +1,8 @@
 #CAPTION#
 getBoolean
 ----------
+
+This function returns a the value of an Boolean variable.
 #END#
 
 #LUA#

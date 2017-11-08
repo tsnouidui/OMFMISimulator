@@ -1,6 +1,8 @@
 #CAPTION#
 setInteger
 ----------
+
+Set parameter and input values of type integer.
 #END#
 
 #LUA#

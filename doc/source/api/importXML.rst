@@ -1,6 +1,8 @@
 #CAPTION#
 importXML
 ---------
+
+This function loads an composite model from a given xml file.
 #END#
 
 #LUA#

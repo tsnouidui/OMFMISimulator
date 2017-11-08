@@ -1,6 +1,8 @@
 #CAPTION#
 exportDependencyGraph
 ---------------------
+
+This function generates two dot files representing the dependencies of the initialization and simulation system, including local (inner) dependencies.
 #END#
 
 #LUA#

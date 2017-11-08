@@ -1,6 +1,8 @@
 #CAPTION#
 setStopTime
 -----------
+
+This function defines the stop time of a given composite model.
 #END#
 
 #LUA#

@@ -1,6 +1,8 @@
 #CAPTION#
 stepUntil
 ---------
+
+This function performs the simulation from the current time value to a given time value.
 #END#
 
 #LUA#

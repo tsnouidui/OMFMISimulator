@@ -1,6 +1,8 @@
 #CAPTION#
 setSolverMethod
 ---------------
+
+This functions defines the integration method of a given FMU instance.
 #END#
 
 #LUA#
@@ -24,4 +26,5 @@ setSolverMethod
 #END#
 
 #DESCRIPTION#
+It is only possible to define a solver method for ME FMUs.
 #END#

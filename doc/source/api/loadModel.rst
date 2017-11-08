@@ -1,18 +1,16 @@
 #CAPTION#
 loadModel
 ---------
+
+This function loads an composite model from a given xml file.
 #END#
 
 #LUA#
 .. code-block:: lua
 
-  loadModel(filename)
-
-.. csv-table::
-  :header: "Input", "Type", "Description"
-  :widths: 15, 10, 40
-
-  "filename", "String", ""
+  -- filename [in]  Path to xml file.
+  -- model    [out] Opaque pointer to composite model.
+  model = loadModel(filename)
 #END#
 
 #CAPI#

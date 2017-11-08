@@ -1,6 +1,8 @@
 #CAPTION#
 setStartTime
 ------------
+
+This function defines the start time of a given composite model.
 #END#
 
 #LUA#

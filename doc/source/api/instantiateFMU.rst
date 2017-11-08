@@ -1,6 +1,8 @@
 #CAPTION#
 instantiateFMU
 --------------
+
+This function instantiates a FMU and makes it available under a given name.
 #END#
 
 #LUA#

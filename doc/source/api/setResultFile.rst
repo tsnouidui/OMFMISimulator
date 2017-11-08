@@ -1,6 +1,8 @@
 #CAPTION#
 setResultFile
 -------------
+
+This functions defines the result file name of the given composite model.
 #END#
 
 #LUA#
@@ -23,4 +25,5 @@ setResultFile
 #END#
 
 #DESCRIPTION#
+mat files and csv files are supported.
 #END#

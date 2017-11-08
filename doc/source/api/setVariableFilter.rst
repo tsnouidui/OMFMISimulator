@@ -1,6 +1,8 @@
 #CAPTION#
 setVariableFilter
 -----------------
+
+This function defines a variable filter based on regular expressions to select which signals are going to be stored in the result file.
 #END#
 
 #LUA#

@@ -1,6 +1,8 @@
 #CAPTION#
 setWorkingDirectory
 -------------------
+
+This function defines the working directory, which is the root of all relative paths used later on.
 #END#
 
 #LUA#

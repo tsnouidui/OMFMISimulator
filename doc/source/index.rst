@@ -2,7 +2,9 @@ OMFMISimulator's documentation
 ==============================
 
 .. only :: html or epub
+
   .. include :: releaselink.inc
+
 
 .. toctree::
   :maxdepth: 2
@@ -13,7 +15,8 @@ OMFMISimulator's documentation
   OMFMISimulatorLua
 
 
-.. only:: html or epub
+.. only :: html or epub
+
   Indices and tables
   ==================
 

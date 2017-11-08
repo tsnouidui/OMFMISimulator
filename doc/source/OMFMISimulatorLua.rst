@@ -1,10 +1,12 @@
 .. index:: OMFMISimulatorLua
+
 OMFMISimulatorLua
 =================
 
 This is a shared library that provides a Lua interface for the OMFMISimulatorLib library.
 
 .. index:: OMFMISimulatorLua; Examples
+
 Examples
 ########
 
@@ -36,6 +38,7 @@ Examples
   unload(model)
 
 .. index:: OMFMISimulatorLua; Scripting Commands
+
 Lua Scripting Commands
 ######################
 

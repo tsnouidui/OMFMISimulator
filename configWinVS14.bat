@@ -10,7 +10,7 @@ cmake -G "Visual Studio 14 2015 Win64" -DFMILIB_INSTALL_PREFIX=..\..\install\win
 CD ..\..\..\..
 echo # build fmil
 @call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
-msbuild.exe "3rdParty\FMIL\build\win\INSTALL.vcxproj" /t:Build /p:configuration=Debug
+msbuild.exe "3rdParty\FMIL\build\win\INSTALL.vcxproj" /t:Build /p:configuration=Release
 
 echo # build Lua
 CD 3rdParty\Lua
@@ -26,7 +26,7 @@ CD 3rdParty\cvode\build-win
 cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX=..\install\win .. -DEXAMPLES_ENABLE:BOOL="0" -DBUILD_SHARED_LIBS:BOOL="0"
 CD ..\..\..
 echo # build cvode
-msbuild.exe "3rdParty\cvode\build-win\INSTALL.vcxproj" /t:Build /p:configuration=Debug
+msbuild.exe "3rdParty\cvode\build-win\INSTALL.vcxproj" /t:Build /p:configuration=Release
 
 echo # config kinsol
 if exist "3rdParty\kinsol\build-win\" RMDIR /S /Q 3rdParty\kinsol\build-win
@@ -36,7 +36,7 @@ CD 3rdParty\kinsol\build-win
 cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX=..\install\win .. -DEXAMPLES_ENABLE:BOOL="0" -DBUILD_SHARED_LIBS:BOOL="0"
 CD ..\..\..
 echo # build kinsol
-msbuild.exe "3rdParty\kinsol\build-win\INSTALL.vcxproj" /t:Build /p:configuration=Debug
+msbuild.exe "3rdParty\kinsol\build-win\INSTALL.vcxproj" /t:Build /p:configuration=Release
 
 echo # config OMFMISimulator
 if exist "build\win\" RMDIR /S /Q build\win

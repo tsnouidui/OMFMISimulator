@@ -33,7 +33,7 @@ ENDIF()
 # BTH There is more what can be set. What do we want?
 #set(Boost_USE_MULTITHREADED ON)
 # Boost v1.54 is the boost shipped with my Ubuntu 14.04, lower versions may work, too.
-find_package(Boost 1.54.0 COMPONENTS system filesystem program_options REQUIRED)
+find_package(Boost 1.63.0 COMPONENTS system filesystem program_options REQUIRED)
 IF (Boost_FOUND)
   message(STATUS "Found Boost")
   message(STATUS "  Boost_LIBRARIES:    " ${Boost_LIBRARIES})
